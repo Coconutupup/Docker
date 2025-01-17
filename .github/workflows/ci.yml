@@ -1,4 +1,4 @@
-name: CI
+name: Build and Save Docker Image
 
 on: [push]
 
@@ -19,9 +19,13 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
 
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v2
+    - name: Build Docker image
+      run: docker build -t quay.io/ceph/ceph:v19 .
+
+    - name: Save Docker image
+      run: docker save quay.io/ceph/ceph:v19 -o ceph_v19.tar
+    - name: Upload Docker image
+      uses: actions/upload-artifact@v2
       with:
-        context: .
-        push: true
-        tags: user/repo:latest
+        name: ceph_v19
+        path: ceph_v19.tar
